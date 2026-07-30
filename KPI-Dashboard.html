@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI Dashboard [ISSD/ITH]</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Filters */
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    /* Metrics Cards */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-left: 4px solid #3498db;
+    }
+
+    .metric-card.ith {
+      border-left-color: #3498db;
+    }
+
+    .metric-card.issd {
+      border-left-color: #e91e63;
+    }
+
+    .metric-card.automated {
+      border-left-color: #27ae60;
+    }
+
+    .metric-card.manual {
+      border-left-color: #f39c12;
+    }
+
+    .metric-card h3 {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .metric-card .value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .metric-card .subtext {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ecf0f1;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+      color: #666;
+    }
+
+    .tab:hover {
+      background: #f8f9fa;
+      color: #3498db;
+    }
+
+    .tab.active {
+      background: #ecf0f1;
+      color: #3498db;
+      border-bottom-color: #3498db;
+    }
+
+    /* Table */
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: #f8f9fa;
+      border-bottom: 2px solid #ecf0f1;
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge.ith {
+      background: #d4ebf7;
+      color: #0277bd;
+    }
+
+    .badge.issd {
+      background: #f8bbd0;
+      color: #c2185b;
+    }
+
+    .badge.automated {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .badge.manual {
+      background: #ffe0b2;
+      color: #e65100;
+    }
+
+    .badge.open {
+      background: #ffe0b2;
+      color: #e65100;
+    }
+
+    .badge.resolved {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border-left: 4px solid #c62828;
+    }
+
+    .refresh-info {
+      text-align: right;
+      font-size: 11px;
+      color: #999;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        flex: 1 1 50%;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 KPI Dashboard [ISSD/ITH]</h1>
+    <p>Combined IT Service Desk & Indirect Spend automation metrics</p>
+  </div>
+
+  <div class="container">
+    <!-- Error message -->
+    <div id="error-container"></div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Source</label>
+        <select id="source-filter">
+          <option value="All">All Sources</option>
+          <option value="ITH">ITH Only</option>
+          <option value="ISSD">ISSD Only</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Automation</label>
+        <select id="automation-filter">
+          <option value="All">All</option>
+          <option value="Automated">Automated (L0)</option>
+          <option value="Manual">Manual (L1/L2)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Time Range</label>
+        <select id="time-filter">
+          <option value="All Time">All Time</option>
+          <option value="This Year">This Year</option>
+          <option value="This Month">This Month</option>
+          <option value="Last 14 Days">Last 14 Days</option>
+          <option value="Custom">Custom Date Range</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="status-filter">
+          <option value="All">All</option>
+          <option value="Open">Open</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Scope</label>
+        <select id="scope-filter">
+          <option value="All">All</option>
+          <option value="Shared Drive">Shared Drive</option>
+          <option value="Google Group">Google Group</option>
+          <option value="Meeting Room">Meeting Room</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="filter-group" id="custom-date-group" style="display: none;">
+        <label>Start Date</label>
+        <input type="date" id="custom-start-date">
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-card">
+        <h3>Total Tickets</h3>
+        <div class="value" id="metric-total">-</div>
+      </div>
+
+      <div class="metric-card ith">
+        <h3>ITH Tickets</h3>
+        <div class="value" id="metric-ith">-</div>
+      </div>
+
+      <div class="metric-card issd">
+        <h3>ISSD Tickets</h3>
+        <div class="value" id="metric-issd">-</div>
+      </div>
+
+      <div class="metric-card automated">
+        <h3>Automated (L0)</h3>
+        <div class="value" id="metric-automated">-</div>
+        <div class="subtext" id="metric-automated-pct">0%</div>
+      </div>
+
+      <div class="metric-card manual">
+        <h3>Manual (L1/L2)</h3>
+        <div class="value" id="metric-manual">-</div>
+        <div class="subtext" id="metric-manual-pct">0%</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="all">All Tickets</button>
+      <button class="tab" data-tab="ith">ITH Only</button>
+      <button class="tab" data-tab="issd">ISSD Only</button>
+      <button class="tab" data-tab="automated">Automated (L0)</button>
+      <button class="tab" data-tab="manual">Manual (L1/L2)</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket Key</th>
+            <th>Source</th>
+            <th>Summary</th>
+            <th>Status</th>
+            <th>Type</th>
+            <th>Scope</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="tickets-tbody">
+          <tr><td colspan="7" class="loading">Loading tickets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="refresh-info">
+      Last updated: <span id="last-update">—</span> | Data synced every 15 minutes
+    </div>
+  </div>
+
+  <script>
+    const scriptUrl = '<?= scriptUrl ?>';
+    let currentTab = 'all';
+    let ticketsData = [];
+
+    // Tab handlers
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentTab = this.dataset.tab;
+        refreshDashboard();
+      });
+    });
+
+    // Filter handlers
+    document.getElementById('source-filter').addEventListener('change', refreshDashboard);
+    document.getElementById('automation-filter').addEventListener('change', refreshDashboard);
+    document.getElementById('time-filter').addEventListener('change', function() {
+      if (this.value === 'Custom') {
+        document.getElementById('custom-date-group').style.display = 'block';
+      } else {
+        document.getElementById('custom-date-group').style.display = 'none';
+      }
+      refreshDashboard();
+    });
+    document.getElementById('status-filter').addEventListener('change', refreshDashboard);
+    document.getElementById('scope-filter').addEventListener('change', refreshDashboard);
+    document.getElementById('custom-start-date').addEventListener('change', refreshDashboard);
+
+    // Get filter values
+    function getFilters() {
+      const filters = {
+        source: document.getElementById('source-filter').value,
+        automation: document.getElementById('automation-filter').value,
+        timeRange: document.getElementById('time-filter').value,
+        status: document.getElementById('status-filter').value,
+        scope: document.getElementById('scope-filter').value,
+        customStartDate: document.getElementById('custom-start-date').value,
+        tab: currentTab
+      };
+      return filters;
+    }
+
+    // Refresh dashboard
+    function refreshDashboard() {
+      const filters = getFilters();
+
+      // Handle tab-based filtering
+      if (filters.tab === 'ith') {
+        filters.source = 'ITH';
+      } else if (filters.tab === 'issd') {
+        filters.source = 'ISSD';
+      } else if (filters.tab === 'automated') {
+        filters.automation = 'Automated';
+      } else if (filters.tab === 'manual') {
+        filters.automation = 'Manual';
+      }
+
+      google.script.run.withSuccessHandler(onDataReceived).getDashboardData(filters);
+    }
+
+    function onDataReceived(result) {
+      if (result.error) {
+        document.getElementById('error-container').innerHTML = `<div class="error">⚠️ ${result.error}</div>`;
+        return;
+      }
+
+      document.getElementById('error-container').innerHTML = '';
+
+      ticketsData = result.tickets || [];
+
+      // Update metrics
+      if (result.metrics) {
+        document.getElementById('metric-total').textContent = result.metrics.total || 0;
+        document.getElementById('metric-ith').textContent = result.metrics.ith_count || 0;
+        document.getElementById('metric-issd').textContent = result.metrics.issd_count || 0;
+        document.getElementById('metric-automated').textContent = result.metrics.automated || 0;
+        document.getElementById('metric-automated-pct').textContent = (result.metrics.automated_percent || 0) + '%';
+        document.getElementById('metric-manual').textContent = result.metrics.manual || 0;
+        document.getElementById('metric-manual-pct').textContent = (result.metrics.manual_percent || 0) + '%';
+      }
+
+      // Update table
+      const tbody = document.getElementById('tickets-tbody');
+      if (ticketsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No tickets found</td></tr>';
+      } else {
+        tbody.innerHTML = ticketsData.map(ticket => `
+          <tr>
+            <td><a href="https://hellofresh.atlassian.net/browse/${ticket.key}" target="_blank">${ticket.key}</a></td>
+            <td><span class="badge ${ticket.source.toLowerCase()}">${ticket.source}</span></td>
+            <td>${ticket.summary || '—'}</td>
+            <td><span class="badge ${(ticket.status || '').toLowerCase().includes('resolved') ? 'resolved' : 'open'}">${ticket.status || '—'}</span></td>
+            <td>${ticket.type || '—'}</td>
+            <td>${ticket.scope || '—'}</td>
+            <td>${ticket.created ? new Date(ticket.created).toLocaleDateString() : '—'}</td>
+          </tr>
+        `).join('');
+      }
+
+      // Update refresh time
+      if (result.summary && result.summary.last_update) {
+        document.getElementById('last-update').textContent = new Date(result.summary.last_update).toLocaleString();
+      }
+    }
+
+    // Initial load
+    refreshDashboard();
+  </script>
+</body>
+</html>
