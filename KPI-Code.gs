@@ -8,7 +8,7 @@
  */
 
 const CONFIG = {
-  COMBINED_FOLDER_ID: PropertiesService.getScriptProperties().getProperty('COMBINED_FOLDER_ID') || 'YOUR_FOLDER_ID_HERE',
+  COMBINED_FOLDER_ID: PropertiesService.getScriptProperties().getProperty('COMBINED_FOLDER_ID') || '1pedfZQ7v-aNVlP2a05he6OI5cL-UlV5-',
   CACHE_LIFETIME_MINUTES: 5
 };
 
@@ -16,7 +16,7 @@ const CONFIG = {
  * Web App entry point — serves the dashboard HTML
  */
 function doGet(e) {
-  const htmlTemplate = HtmlService.createTemplateFromFile('Dashboard');
+  const htmlTemplate = HtmlService.createTemplateFromFile('KPI-Dashboard');
   htmlTemplate.scriptUrl = ScriptApp.getUrl();
   return htmlTemplate.evaluate()
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
