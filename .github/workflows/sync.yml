@@ -1,0 +1,43 @@
+name: KPI Dashboard Sync
+
+on:
+  schedule:
+    # Run every 15 minutes to combine both caches
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync_combined_data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run Combined Sync Script
+      env:
+        ITH_DRIVE_FOLDER_ID: ${{ secrets.ITH_DRIVE_FOLDER_ID }}
+        ISSD_DRIVE_FOLDER_ID: ${{ secrets.ISSD_DRIVE_FOLDER_ID }}
+        COMBINED_DRIVE_FOLDER_ID: ${{ secrets.COMBINED_DRIVE_FOLDER_ID }}
+        GCP_USER_CREDENTIALS: ${{ secrets.GCP_USER_CREDENTIALS }}
+      run: python sync.py 2>&1 | tee sync.log
+
+    - name: Upload sync logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: sync-logs-${{ github.run_id }}
+        path: sync.log
+        retention-days: 30
